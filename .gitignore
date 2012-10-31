@@ -36,3 +36,11 @@
 .idea/workspace.xml
 
 db-evaluation.iml
+
+.idea/ant.xml
+
+*.class
+
+target/classes/enwiki_short.xml
+
+target/classes/log4j.xml
