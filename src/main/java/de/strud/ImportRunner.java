@@ -35,7 +35,7 @@ public class ImportRunner {
 
     public static void main(String[] args) {
         Options opts = CliFactory.parseArguments(Options.class, args);
-
+        LOG.info("Starting import process, using file " + opts.getFile() + ".");
         try {
             FileInputStream fin = new FileInputStream(new File(opts.getFile()));
             XMLParser parser = new XMLParser(fin);
@@ -53,6 +53,7 @@ public class ImportRunner {
             LOG.error("Cannot find selected xml file.", e);
             System.exit(-1);
         }
+
         LOG.info("Import finished, bye bye.");
         System.exit(0);
     }

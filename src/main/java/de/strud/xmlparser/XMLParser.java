@@ -30,6 +30,9 @@ public class XMLParser {
     private Meter xmlMeter;
 
     public XMLParser(InputStream source) {
+        if (source == null) {
+            throw new IllegalArgumentException("InputStream cannot be null.");
+        }
         this.source = source;
         this.xmlMeter = Metrics.newMeter(new MetricName("xml", "parsing", "rate"), "parsed", TimeUnit.SECONDS);
     }
