@@ -36,9 +36,9 @@ public class Importer {
             imported &= this.importer.importDocument(doc);
             this.importMeter.mark();
             if (this.importMeter.count() % 10000 == 0) {
-                LOG.info("Inserted " + this.importMeter.count() + " from " + documents.size() + " documents, " +
+                LOG.info("Inserted " + importedDocs + " from " + documents.size() + " documents (total " + this.importMeter.count() + "), " +
                         "current rate " + this.importMeter.oneMinuteRate() + " docs/sec; " +
-                        "est. " + ((documents.size() - importedDocs) / this.importMeter.oneMinuteRate()) / 60 + " minutes to go.");
+                        "est. " + ((documents.size() - importedDocs) / this.importMeter.oneMinuteRate()) + " seconds to go.");
             }
         }
         return imported;
