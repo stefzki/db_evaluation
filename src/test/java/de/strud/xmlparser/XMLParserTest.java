@@ -14,7 +14,8 @@ public class XMLParserTest {
     @Test
     public void testParsing() throws Exception {
         XMLParser parser = new XMLParser(this.getClass().getClassLoader().getResourceAsStream("enwiki_short.xml"));
-        List<Document> docs = parser.parse();
+        Assert.assertTrue("Parser should have entries.", !parser.isRead());
+        List<Document> docs = parser.parse(1);
         Assert.assertNotNull("Documents cannot be null.", docs);
         Assert.assertTrue("Documents should have length > 0.", docs.size() > 0);
         Assert.assertNotNull("Text cannot be null.", docs.get(0).getText());

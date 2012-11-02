@@ -27,58 +27,62 @@ public class XMLParser {
 
     private final InputStream source;
 
+    private final XMLStreamReader streamReader;
+
     private Meter xmlMeter;
 
-    public XMLParser(InputStream source) {
+    public XMLParser(InputStream source) throws XMLStreamException {
         if (source == null) {
             throw new IllegalArgumentException("InputStream cannot be null.");
         }
         this.source = source;
         this.xmlMeter = Metrics.newMeter(new MetricName("xml", "parsing", "rate"), "parsed", TimeUnit.SECONDS);
+        XMLInputFactory factory = XMLInputFactory.newInstance();
+        this.streamReader = factory.createXMLStreamReader(this.source);
     }
 
-    public List<Document> parse() {
+    public List<Document> parse(final int limit) {
         List<Document> documents = new LinkedList<>();
-        XMLInputFactory factory = XMLInputFactory.newInstance();
         try {
-            XMLStreamReader streamReader = factory.createXMLStreamReader(this.source);
+            int parsed = 0;
             boolean inTitle = false;
             boolean inText = false;
             boolean inUrl = false;
             Document currentDoc = null;
-            while(streamReader.hasNext()){
-                streamReader.next();
-                if(streamReader.getEventType() == XMLStreamReader.START_ELEMENT){
-                    if ("doc".equals(streamReader.getLocalName())) {
+            while(parsed < limit && this.streamReader.hasNext()){
+                this.streamReader.next();
+                if(this.streamReader.getEventType() == XMLStreamReader.START_ELEMENT){
+                    if ("doc".equals(this.streamReader.getLocalName())) {
                         currentDoc = new Document();
-                    } else if ("title".equals(streamReader.getLocalName())) {
+                    } else if ("title".equals(this.streamReader.getLocalName())) {
                         inTitle = true;
-                    } else if ("abstract".equals(streamReader.getLocalName())) {
+                    } else if ("abstract".equals(this.streamReader.getLocalName())) {
                         inText = true;
-                    } else if ("url".equals(streamReader.getLocalName())) {
+                    } else if ("url".equals(this.streamReader.getLocalName())) {
                         inUrl = true;
                     }
-                } else if (streamReader.getEventType() == XMLStreamConstants.CHARACTERS) {
+                } else if (this.streamReader.getEventType() == XMLStreamConstants.CHARACTERS) {
                     if (inUrl) {
-                        currentDoc.setUrl(streamReader.getText());
+                        currentDoc.setUrl(this.streamReader.getText());
                     } else if (inText) {
-                        currentDoc.setText(streamReader.getText());
+                        currentDoc.setText(this.streamReader.getText());
                     } else if (inTitle) {
-                        currentDoc.setTitle(streamReader.getText());
+                        currentDoc.setTitle(this.streamReader.getText());
                     }
-                } else if(streamReader.getEventType() == XMLStreamReader.END_ELEMENT){
-                    if ("doc".equals(streamReader.getLocalName())) {
+                } else if(this.streamReader.getEventType() == XMLStreamReader.END_ELEMENT){
+                    if ("doc".equals(this.streamReader.getLocalName())) {
+                        parsed++;
                         documents.add(currentDoc);
                         this.xmlMeter.mark();
                         if (this.xmlMeter.count() % 50000 == 0) {
                             LOG.info("Parsed " + this.xmlMeter.count() + " documents, current rate " + this.xmlMeter.oneMinuteRate() + " docs/sec.");
                         }
                         currentDoc = null;
-                    } else if ("title".equals(streamReader.getLocalName())) {
+                    } else if ("title".equals(this.streamReader.getLocalName())) {
                         inTitle = false;
-                    } else if ("abstract".equals(streamReader.getLocalName())) {
+                    } else if ("abstract".equals(this.streamReader.getLocalName())) {
                         inText = false;
-                    } else if ("url".equals(streamReader.getLocalName())) {
+                    } else if ("url".equals(this.streamReader.getLocalName())) {
                         inUrl = false;
                     }
                 }
@@ -87,6 +91,14 @@ public class XMLParser {
             LOG.error("Cannot parse xml.", e);
         }
         return documents;
+    }
+
+    public boolean isRead() {
+        try {
+            return !this.streamReader.hasNext();
+        } catch (XMLStreamException e) {
+            return false;
+        }
     }
 
 }

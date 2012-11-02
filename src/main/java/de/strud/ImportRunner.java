@@ -9,6 +9,7 @@ import de.strud.xmlparser.XMLParser;
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 
+import javax.xml.stream.XMLStreamException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -41,10 +42,12 @@ public class ImportRunner {
             XMLParser parser = new XMLParser(fin);
             Importer importer = new Importer(new MongoDBImporter(opts.getHost(), opts.getPort()));
             LOG.info("Start parsing documents.");
-            List<Document> documents = parser.parse();
-            LOG.info("Parsed " + documents.size() + " documents, starting import.");
-            importer.importDocuments(documents);
-            LOG.info("Imported " + documents.size() + " documents.");
+            while (!parser.isRead()) {
+                List<Document> documents = parser.parse(100000);
+                LOG.info("Parsed batch of " + documents.size() + " documents, starting import.");
+                importer.importDocuments(documents);
+                LOG.info("Imported batch of " + documents.size() + " documents.");
+            }
             IOUtils.closeQuietly(fin);
         } catch (UnknownHostException e) {
             LOG.error("Cannot connect to db.", e);
@@ -52,6 +55,8 @@ public class ImportRunner {
         } catch (FileNotFoundException e) {
             LOG.error("Cannot find selected xml file.", e);
             System.exit(-1);
+        } catch (XMLStreamException e) {
+            LOG.error("Error when parsing xml.", e);
         }
 
         LOG.info("Import finished, bye bye.");

@@ -30,10 +30,15 @@ public class Importer {
 
     public boolean importDocuments(final List<Document> documents) {
         boolean imported = true;
+        int importedDocs = 0;
         for (Document doc : documents) {
+            importedDocs++;
             imported &= this.importer.importDocument(doc);
-            if (this.importMeter.count() % 50000 == 0) {
-                LOG.info("Inserted " + this.importMeter.count() + " from " + documents.size() + " current rate " + this.importMeter.oneMinuteRate() + " docs/sec; est. " + ((documents.size() - this.importMeter.count()) / this.importMeter.oneMinuteRate()) / 60 + " minutes to go.");
+            this.importMeter.mark();
+            if (this.importMeter.count() % 10000 == 0) {
+                LOG.info("Inserted " + this.importMeter.count() + " from " + documents.size() + " documents, " +
+                        "current rate " + this.importMeter.oneMinuteRate() + " docs/sec; " +
+                        "est. " + ((documents.size() - importedDocs) / this.importMeter.oneMinuteRate()) / 60 + " minutes to go.");
             }
         }
         return imported;
