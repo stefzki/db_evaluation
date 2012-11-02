@@ -53,9 +53,9 @@ public class XMLParser {
                         currentDoc = new Document();
                     } else if ("title".equals(streamReader.getLocalName())) {
                         inTitle = true;
-                    } else if ("text".equals(streamReader.getLocalName())) {
+                    } else if ("abstract".equals(streamReader.getLocalName())) {
                         inText = true;
-                    } else if ("title".equals(streamReader.getLocalName())) {
+                    } else if ("url".equals(streamReader.getLocalName())) {
                         inUrl = true;
                     }
                 } else if (streamReader.getEventType() == XMLStreamConstants.CHARACTERS) {
@@ -76,9 +76,9 @@ public class XMLParser {
                         currentDoc = null;
                     } else if ("title".equals(streamReader.getLocalName())) {
                         inTitle = false;
-                    } else if ("text".equals(streamReader.getLocalName())) {
+                    } else if ("abstract".equals(streamReader.getLocalName())) {
                         inText = false;
-                    } else if ("title".equals(streamReader.getLocalName())) {
+                    } else if ("url".equals(streamReader.getLocalName())) {
                         inUrl = false;
                     }
                 }

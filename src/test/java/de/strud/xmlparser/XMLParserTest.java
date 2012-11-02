@@ -17,6 +17,9 @@ public class XMLParserTest {
         List<Document> docs = parser.parse();
         Assert.assertNotNull("Documents cannot be null.", docs);
         Assert.assertTrue("Documents should have length > 0.", docs.size() > 0);
+        Assert.assertNotNull("Text cannot be null.", docs.get(0).getText());
+        Assert.assertNotNull("Title cannot be null.", docs.get(0).getTitle());
+        Assert.assertNotNull("URL cannot be null.", docs.get(0).getUrl());
     }
 
     @Test(expected = IllegalArgumentException.class)
