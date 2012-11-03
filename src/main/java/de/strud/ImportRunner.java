@@ -39,7 +39,7 @@ public class ImportRunner {
         LOG.info("Starting import process, using file " + opts.getFile() + ".");
         try {
             FileInputStream fin = new FileInputStream(new File(opts.getFile()));
-            XMLParser parser = new XMLParser(fin);
+            XMLParser parser = new XMLParser(fin, 5);
             Importer importer = new Importer(new MongoDBImporter(opts.getHost(), opts.getPort()));
             LOG.info("Start parsing documents.");
             while (!parser.isRead()) {

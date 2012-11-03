@@ -27,11 +27,13 @@ public class XMLParser {
 
     private final InputStream source;
 
+    private final int every;
+
     private final XMLStreamReader streamReader;
 
     private Meter xmlMeter;
 
-    public XMLParser(InputStream source) throws XMLStreamException {
+    public XMLParser(InputStream source, int every) throws XMLStreamException {
         if (source == null) {
             throw new IllegalArgumentException("InputStream cannot be null.");
         }
@@ -39,6 +41,7 @@ public class XMLParser {
         this.xmlMeter = Metrics.newMeter(new MetricName("xml", "parsing", "rate"), "parsed", TimeUnit.SECONDS);
         XMLInputFactory factory = XMLInputFactory.newInstance();
         this.streamReader = factory.createXMLStreamReader(this.source);
+        this.every = every;
     }
 
     public List<Document> parse(final int limit) {
@@ -71,8 +74,10 @@ public class XMLParser {
                     }
                 } else if(this.streamReader.getEventType() == XMLStreamReader.END_ELEMENT){
                     if ("doc".equals(this.streamReader.getLocalName())) {
+                        if (parsed % every == 0) {
+                            documents.add(currentDoc);
+                        }
                         parsed++;
-                        documents.add(currentDoc);
                         this.xmlMeter.mark();
                         if (this.xmlMeter.count() % 50000 == 0) {
                             LOG.info("Parsed " + this.xmlMeter.count() + " documents, current rate " + this.xmlMeter.oneMinuteRate() + " docs/sec.");
