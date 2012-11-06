@@ -13,7 +13,8 @@ public class XMLParserTest {
 
     @Test
     public void testParsing() throws Exception {
-        XMLParser parser = new XMLParser(this.getClass().getClassLoader().getResourceAsStream("enwiki_short.xml"));
+        XMLParser parser = new XMLParser(
+                this.getClass().getClassLoader().getResourceAsStream("enwiki_short.xml"), 1);
         Assert.assertTrue("Parser should have entries.", !parser.isRead());
         List<Document> docs = parser.parse(1);
         Assert.assertNotNull("Documents cannot be null.", docs);
@@ -25,6 +26,6 @@ public class XMLParserTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testParsingWithNull() throws Exception {
-        new XMLParser(null);
+        new XMLParser(null, 0);
     }
 }
