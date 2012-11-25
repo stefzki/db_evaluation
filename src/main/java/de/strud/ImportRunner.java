@@ -18,6 +18,7 @@ import java.util.List;
 
 /**
  * Main class, opens a file and starts parsing and importer db insertion. Change implementations to use different importers.
+ *
  * User: strud
  */
 public class ImportRunner {
