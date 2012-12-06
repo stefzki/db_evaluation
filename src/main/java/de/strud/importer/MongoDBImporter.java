@@ -2,6 +2,7 @@ package de.strud.importer;
 
 import com.mongodb.*;
 import de.strud.data.Document;
+import de.strud.exceptions.DBImporterInitializationException;
 import org.apache.log4j.Logger;
 
 import java.net.UnknownHostException;
@@ -23,10 +24,14 @@ public class MongoDBImporter implements DBImporter {
     private final DBCollection collection;
 
 
-    public MongoDBImporter(final String host, final int port) throws UnknownHostException {
-        this.mongo = new Mongo(host, port);
-        DB database = this.mongo.getDB("wikipedia");
-        this.collection = database.getCollection("articles");
+    public MongoDBImporter(final String host, final int port) throws DBImporterInitializationException {
+        try {
+            this.mongo = new Mongo(host, port);
+            DB database = this.mongo.getDB("wikipedia");
+            this.collection = database.getCollection("articles");
+        } catch (UnknownHostException e) {
+            throw new DBImporterInitializationException("Cannot connect to mongo.", e);
+        }
     }
 
     @Override

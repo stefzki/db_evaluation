@@ -3,8 +3,11 @@ package de.strud;
 import com.lexicalscope.jewel.cli.CliFactory;
 import com.lexicalscope.jewel.cli.Option;
 import de.strud.data.Document;
+import de.strud.exceptions.DBImporterInitializationException;
 import de.strud.importer.Importer;
 import de.strud.importer.MongoDBImporter;
+import de.strud.importer.MysqlImporter;
+import de.strud.importer.RiakImporter;
 import de.strud.xmlparser.XMLParser;
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
@@ -13,7 +16,6 @@ import javax.xml.stream.XMLStreamException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.net.UnknownHostException;
 import java.util.List;
 
 /**
@@ -33,6 +35,8 @@ public class ImportRunner {
 
         @Option int getPort();
 
+        @Option String getMode();
+
     }
 
     public static void main(String[] args) {
@@ -40,8 +44,22 @@ public class ImportRunner {
         LOG.info("Starting import process, using file " + opts.getFile() + ".");
         try {
             FileInputStream fin = new FileInputStream(new File(opts.getFile()));
-            XMLParser parser = new XMLParser(fin, 5);
-            Importer importer = new Importer(new MongoDBImporter(opts.getHost(), opts.getPort()));
+            XMLParser parser = new XMLParser(fin, 1);
+            Importer importer = null;
+            switch (opts.getMode()) {
+                case "mongo":
+                    importer = new Importer(new MongoDBImporter(opts.getHost(), opts.getPort()));
+                    break;
+                case "riak":
+                    importer = new Importer(new RiakImporter(opts.getHost(), opts.getPort()));
+                    break;
+                case "mysql":
+                    importer = new Importer(new MysqlImporter(opts.getHost(), opts.getPort()));
+                    break;
+                default:
+                    LOG.error("Cannot create concrete importer, aborting.");
+                    System.exit(-1);
+            }
             LOG.info("Start parsing documents.");
             while (!parser.isRead()) {
                 List<Document> documents = parser.parse(100000);
@@ -50,7 +68,7 @@ public class ImportRunner {
                 LOG.info("Imported batch of " + documents.size() + " documents.");
             }
             IOUtils.closeQuietly(fin);
-        } catch (UnknownHostException e) {
+        } catch (DBImporterInitializationException e) {
             LOG.error("Cannot connect to db.", e);
             System.exit(-1);
         } catch (FileNotFoundException e) {
