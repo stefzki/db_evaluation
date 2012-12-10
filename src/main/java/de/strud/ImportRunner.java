@@ -4,10 +4,7 @@ import com.lexicalscope.jewel.cli.CliFactory;
 import com.lexicalscope.jewel.cli.Option;
 import de.strud.data.Document;
 import de.strud.exceptions.DBImporterInitializationException;
-import de.strud.importer.Importer;
-import de.strud.importer.MongoDBImporter;
-import de.strud.importer.MysqlImporter;
-import de.strud.importer.RiakImporter;
+import de.strud.importer.*;
 import de.strud.xmlparser.XMLParser;
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
@@ -55,6 +52,9 @@ public class ImportRunner {
                     break;
                 case "mysql":
                     importer = new Importer(new MysqlImporter(opts.getHost(), opts.getPort()));
+                    break;
+                case "elasticsearch":
+                    importer = new Importer(new ElasticSearchImporter());
                     break;
                 default:
                     LOG.error("Cannot create concrete importer, aborting.");
