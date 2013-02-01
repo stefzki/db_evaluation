@@ -43,15 +43,21 @@ public class ImportRunner {
             FileInputStream fin = new FileInputStream(new File(opts.getFile()));
             XMLParser parser = new XMLParser(fin, 1);
             Importer importer = null;
-            switch (opts.getMode()) {
+            switch (opts.getMode().toLowerCase()) {
                 case "mongo":
                     importer = new Importer(new MongoDBImporter(opts.getHost(), opts.getPort()));
                     break;
                 case "riak":
                     importer = new Importer(new RiakImporter(opts.getHost(), opts.getPort()));
                     break;
+                case "redis":
+                    importer = new Importer(new RedisImporter(opts.getHost(), opts.getPort()));
+                    break;
                 case "mysql":
                     importer = new Importer(new MysqlImporter(opts.getHost(), opts.getPort()));
+                    break;
+                case "postgresql":
+                    importer = new Importer(new PostresqlImporter(opts.getHost(), opts.getPort()));
                     break;
                 case "elasticsearch":
                     importer = new Importer(new ElasticSearchImporter());

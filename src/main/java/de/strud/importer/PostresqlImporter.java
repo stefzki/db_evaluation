@@ -10,45 +10,44 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 /**
- * A MySQL specific implementation, that inserts the articles into a innodb table. The database 'wikipedia' needs to be
+ * A Postresql specific implementation, that inserts the articles. The database 'evaluation' needs to be
  * created before starting the import and the grants for the user root need to be set to any ip.
  *
  * User: strud
  */
-public class MysqlImporter implements DBImporter {
+public class PostresqlImporter implements DBImporter {
 
-    private static final Logger LOG = Logger.getLogger(MysqlImporter.class);
+    private static final Logger LOG = Logger.getLogger(PostresqlImporter.class);
 
     private final Connection connection;
 
-    public MysqlImporter(final String host, final int port) throws DBImporterInitializationException {
+    public PostresqlImporter(final String host, final int port) throws DBImporterInitializationException {
         try {
-            Class.forName("com.mysql.jdbc.Driver");
-            this.connection = DriverManager.getConnection("jdbc:mysql://" + host + ":" + port + "/?user=root");
-            try (PreparedStatement clean = this.connection.prepareStatement("DROP TABLE IF EXISTS `evaluation`.`articles`") ) {
+            Class.forName("org.postgresql.Driver");
+            this.connection = DriverManager.getConnection("jdbc:postgresql://" + host + ":" + port + "/evaluation?user=root");
+            try (PreparedStatement clean = this.connection.prepareStatement("DROP TABLE IF EXISTS articles") ) {
                 clean.execute();
             } catch (SQLException inner) {
                 LOG.error("Cannot cleanup old table.", inner);
             }
 
-            try (PreparedStatement create = this.connection.prepareStatement("CREATE TABLE `evaluation`.`articles` (\n" +
-                    "  `url` varchar(255),\n" +
-                    "  `title` text,\n" +
-                    "  `text` text,\n" +
-                    "  INDEX `url_idx` (`url`)\n" +
-                    ") ENGINE=InnoDB") ) {
+            try (PreparedStatement create = this.connection.prepareStatement("CREATE TABLE articles (\n" +
+                    "  url varchar(255) PRIMARY KEY,\n" +
+                    "  title text,\n" +
+                    "  text text\n" +
+                    ")") ) {
                 create.execute();
             } catch (SQLException inner) {
                 LOG.error("Cannot create empty table.", inner);
             }
         } catch (ClassNotFoundException | SQLException e) {
-            throw new DBImporterInitializationException("Cannot connect to mysql server.", e);
+            throw new DBImporterInitializationException("Cannot connect to postgresql server.", e);
         }
     }
 
     @Override
     public boolean importDocument(Document document) {
-        try (PreparedStatement insert = this.connection.prepareStatement("INSERT INTO `evaluation`.`articles` SET url=?, title=?, text=?") ) {
+        try (PreparedStatement insert = this.connection.prepareStatement("INSERT INTO articles (url, title, text) values (?, ?, ?)") ) {
             insert.setString(1, document.getUrl());
             insert.setString(2, document.getTitle());
             insert.setString(3, document.getText());

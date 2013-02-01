@@ -15,20 +15,72 @@ Within your ide create a run configuration with the following program parameters
 --file <path to xml dump> 
 --host <db host> 
 --port <port>
+--mode <target importer>
 ```
+
+If you are not using an ide and want to start the example from your command line, run mvn clean install from the command line. If the build is successful you can start the import by the following command from the target directory:
+
+```
+java -cp "db-evaluation-0.1.0-SNAPSHOT.jar:$(echo deps/*.jar | tr ' ' ':')" de.strud.ImportRunner --file /tmp/enwiki-20121001-abstract.xml --mode=<target importer> --host=<db host> --port=<port>
+```
+
+### MongoDB
 
 For the MongoDB example from the MongoDB User Group Berlin, the parameters should look like this:
 
 ```
 --file /tmp/enwiki-20121001-abstract.xml 
 --host=configsrv.local
---mode=mongo
 --port=27019
+--mode=mongo
 ```
 
-If you are not using an ide and want to start the example from your command line, run mvn clean install from the command line. If the build is successfull you can start the import by the following command from the target directory:
+### MySQL
 
 ```
-java -cp "db-evaluation-0.1.0-SNAPSHOT.jar:deps/commons-io-2.4.jar:deps/jewelcli-0.8.3.jar:deps/log4j-1.2.16.jar:deps/mongo-java-driver-2.9.1.jar:deps/hamcrest-core-1.1.jar:deps/metrics-core-2.1.3.jar:deps/slf4j-api-1.6.4.jar" de.strud.xmlparser.XMLParser --file /tmp/enwiki-20121001-abstract.xml --mode=mongo --host=configsrv.local --port=27019
+--file /tmp/enwiki-20121001-abstract.xml
+--host=mysql01.local
+--port=3306
+--mode=mysql
 ```
 
+### Postgresql
+
+```
+--file /tmp/enwiki-20121001-abstract.xml
+--host=postresql01.local
+--port=5432
+--mode=postresql
+```
+
+### Redis
+
+```
+--file /tmp/enwiki-20121001-abstract.xml
+--host=redis01.local
+--port=6379
+--mode=redis
+```
+
+### Riak
+
+```
+--file /tmp/enwiki-20121001-abstract.xml
+--host=riak01.local
+--port=8087
+--mode=riak
+```
+or in distributed mode
+```
+--file /tmp/enwiki-20121001-abstract.xml
+--host=riak01.local,riak02.local,riak03.local
+--port=8087
+--mode=riak
+```
+
+### Elasticsearch (to be tested)
+
+```
+--file /tmp/enwiki-20121001-abstract.xml
+--mode=elasticsearch
+```
