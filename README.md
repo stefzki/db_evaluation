@@ -62,7 +62,7 @@ For the MongoDB example from the MongoDB User Group Berlin, the parameters shoul
 --mode=redis
 ```
 
-### Riak
+### Riak (to be tested)
 
 ```
 --file /tmp/enwiki-20121001-abstract.xml
@@ -70,7 +70,7 @@ For the MongoDB example from the MongoDB User Group Berlin, the parameters shoul
 --port=8087
 --mode=riak
 ```
-or in distributed mode
+or in distributed mode (to be tested)
 ```
 --file /tmp/enwiki-20121001-abstract.xml
 --host=riak01.local,riak02.local,riak03.local
@@ -84,3 +84,11 @@ or in distributed mode
 --file /tmp/enwiki-20121001-abstract.xml
 --mode=elasticsearch
 ```
+
+### in the future
+
+- Hadoop
+- HBase
+- BigCouch
+- Solr
+- SolrCloud
