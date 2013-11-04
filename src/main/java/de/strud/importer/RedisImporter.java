@@ -1,19 +1,13 @@
 package de.strud.importer;
 
-import com.mongodb.*;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import de.strud.data.Document;
 import de.strud.exceptions.DBImporterInitializationException;
 import org.apache.log4j.Logger;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.elasticsearch.index.mapper.ObjectMapperListener;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 
 import java.io.IOException;
-import java.net.SocketException;
-import java.net.UnknownHostException;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * A redis specific implementation, that maps Document objects to a key (url) - value (document) compatible format and
@@ -24,7 +18,7 @@ import java.util.Map;
 public class RedisImporter implements DBImporter {
 
     private static final Logger LOG = Logger.getLogger(RedisImporter.class);
-    
+
     private static final ObjectMapper JSON_MAPPER = new ObjectMapper();
 
     private final JedisPool pool;
@@ -39,6 +33,7 @@ public class RedisImporter implements DBImporter {
 
     @Override
     public boolean importDocument(final Document document) {
+
         boolean success = true;
         Jedis jedis = null;
         try {

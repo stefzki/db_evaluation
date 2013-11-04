@@ -1,6 +1,11 @@
 package de.strud.importer;
 
-import com.mongodb.*;
+import com.mongodb.BasicDBObject;
+import com.mongodb.DB;
+import com.mongodb.DBCollection;
+import com.mongodb.Mongo;
+import com.mongodb.MongoClient;
+import com.mongodb.WriteResult;
 import de.strud.data.Document;
 import de.strud.exceptions.DBImporterInitializationException;
 import org.apache.log4j.Logger;
@@ -19,15 +24,15 @@ public class MongoDBImporter implements DBImporter {
 
     private static final Logger LOG = Logger.getLogger(MongoDBImporter.class);
 
-    private final Mongo mongo;
+    private final MongoClient mongo;
 
     private final DBCollection collection;
 
 
     public MongoDBImporter(final String host, final int port) throws DBImporterInitializationException {
         try {
-            this.mongo = new Mongo(host, port);
-            DB database = this.mongo.getDB("wikipedia");
+            this.mongo = new MongoClient(host, port);
+            DB database = this.mongo.getDB("wikipedia_live");
             this.collection = database.getCollection("articles");
         } catch (UnknownHostException e) {
             throw new DBImporterInitializationException("Cannot connect to mongo.", e);
@@ -44,7 +49,7 @@ public class MongoDBImporter implements DBImporter {
         WriteResult result = this.collection.save(new BasicDBObject(mapped));
         if (result.getError() != null) {
             LOG.error("Unable to store document " + document + " reason: " + result.getError() + ".");
-            success = false;
+          success = false;
         }
         return success;
     }

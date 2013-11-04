@@ -1,6 +1,10 @@
 package de.strud.importer;
 
-import com.mongodb.*;
+import com.mongodb.BasicDBObject;
+import com.mongodb.DB;
+import com.mongodb.DBCollection;
+import com.mongodb.Mongo;
+import com.mongodb.WriteResult;
 import de.strud.data.Document;
 import org.apache.log4j.Logger;
 
