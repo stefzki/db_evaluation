@@ -72,4 +72,5 @@ target/classes/log4j.xml
 
 .idea/qaplug_profiles.xml
 
-target/test-classes/enwiki_short.xml
+target/*
+/target/*
