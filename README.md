@@ -6,7 +6,7 @@ Just a small helper, that allows inserting a wikipedia xml abstract dump into da
 
 ## Prerequisites
 
-Download a xml abstract dump from http://dumps.wikimedia.org/enwiki/20121001/enwiki-20121001-abstract.xml and an installed JDK 7.0 with Maven 2/3.
+Download a xml abstract dump from http://dumps.wikimedia.org/enwiki/20121001/enwiki-20121001-abstract.xml and an installed JDK 20 with Maven 2/3.
 
 ## Usage
 
