@@ -6,7 +6,7 @@ Just a small helper, that allows inserting a wikipedia xml abstract dump into da
 
 ## Prerequisites
 
-Download a xml abstract dump from http://dumps.wikimedia.org/enwiki/20121001/enwiki-20121001-abstract.xml and an installed JDK 20 with Maven 2/3.
+Download a xml abstract dump from https://dumps.wikimedia.org/enwiki/latest/enwiki-latest-abstract.xml.gz and an installed JDK 20 with Maven 2/3.
 
 ## Usage
 
@@ -21,7 +21,7 @@ Within your ide create a run configuration with the following program parameters
 If you are not using an ide and want to start the example from your command line, run mvn clean install from the command line. If the build is successful you can start the import by the following command from the target directory:
 
 ```
-java -cp "db-evaluation-0.1.0-SNAPSHOT.jar:$(echo deps/*.jar | tr ' ' ':')" de.strud.ImportRunner --file /tmp/enwiki-20121001-abstract.xml --mode=<target importer> --host=<db host> --port=<port>
+java -cp "db-evaluation-0.1.0-SNAPSHOT.jar:$(echo deps/*.jar | tr ' ' ':')" de.strud.ImportRunner --file /tmp/enwiki-latest-abstract.xml --mode=<target importer> --host=<db host> --port=<port>
 ```
 
 ### MongoDB
@@ -29,7 +29,7 @@ java -cp "db-evaluation-0.1.0-SNAPSHOT.jar:$(echo deps/*.jar | tr ' ' ':')" de.s
 For the MongoDB example from the MongoDB User Group Berlin, the parameters should look like this:
 
 ```
---file /tmp/enwiki-20121001-abstract.xml 
+--file /tmp/enwiki-latest-abstract.xml 
 --host=configsrv.local
 --port=27019
 --mode=mongo
@@ -38,7 +38,7 @@ For the MongoDB example from the MongoDB User Group Berlin, the parameters shoul
 ### MySQL
 
 ```
---file /tmp/enwiki-20121001-abstract.xml
+--file /tmp/enwiki-latest-abstract.xml
 --host=mysql01.local
 --port=3306
 --mode=mysql
@@ -47,7 +47,7 @@ For the MongoDB example from the MongoDB User Group Berlin, the parameters shoul
 ### Postgresql
 
 ```
---file /tmp/enwiki-20121001-abstract.xml
+--file /tmp/enwiki-latest-abstract.xml
 --host=postresql01.local
 --port=5432
 --mode=postresql
@@ -56,7 +56,7 @@ For the MongoDB example from the MongoDB User Group Berlin, the parameters shoul
 ### Redis
 
 ```
---file /tmp/enwiki-20121001-abstract.xml
+--file /tmp/enwiki-latest-abstract.xml
 --host=redis01.local
 --port=6379
 --mode=redis
@@ -65,7 +65,7 @@ For the MongoDB example from the MongoDB User Group Berlin, the parameters shoul
 ### Elasticsearch (to be tested)
 
 ```
---file /tmp/enwiki-20121001-abstract.xml
+--file /tmp/enwiki-latest-abstract.xml
 --mode=elasticsearch
 ```
 
