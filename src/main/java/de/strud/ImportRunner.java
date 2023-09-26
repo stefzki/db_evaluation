@@ -1,7 +1,19 @@
 package de.strud;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.util.List;
+
+import javax.xml.stream.XMLStreamException;
+
+import org.apache.commons.io.IOUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.lexicalscope.jewel.cli.CliFactory;
 import com.lexicalscope.jewel.cli.Option;
+
 import de.strud.data.Document;
 import de.strud.exceptions.DBImporterInitializationException;
 import de.strud.importer.ElasticSearchImporter;
@@ -10,16 +22,7 @@ import de.strud.importer.MongoDBImporter;
 import de.strud.importer.MysqlImporter;
 import de.strud.importer.PostresqlImporter;
 import de.strud.importer.RedisImporter;
-import de.strud.importer.RiakImporter;
 import de.strud.xmlparser.XMLParser;
-import org.apache.commons.io.IOUtils;
-import org.apache.log4j.Logger;
-
-import javax.xml.stream.XMLStreamException;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.util.List;
 
 /**
  * Main class, opens a file and starts parsing and importer db insertion. Change implementations to use different importers.
@@ -28,7 +31,7 @@ import java.util.List;
  */
 public class ImportRunner {
 
-    private static final Logger LOG = Logger.getLogger(ImportRunner.class);
+    private static final Logger LOG = LogManager.getLogger(ImportRunner.class);
 
     interface Options {
 
@@ -53,9 +56,6 @@ public class ImportRunner {
                 case "mongo":
                     importer = new Importer(new MongoDBImporter(opts.getHost(), opts.getPort()));
                     break;
-                case "riak":
-                    importer = new Importer(new RiakImporter(opts.getHost(), opts.getPort()));
-                    break;
                 case "redis":
                     importer = new Importer(new RedisImporter(opts.getHost(), opts.getPort()));
                     break;
@@ -66,7 +66,7 @@ public class ImportRunner {
                     importer = new Importer(new PostresqlImporter(opts.getHost(), opts.getPort()));
                     break;
                 case "elasticsearch":
-                    importer = new Importer(new ElasticSearchImporter());
+                    importer = new Importer(new ElasticSearchImporter(opts.getHost(), opts.getPort()));
                     break;
                 default:
                     LOG.error("Cannot create concrete importer, aborting.");

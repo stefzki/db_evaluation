@@ -1,19 +1,23 @@
 package de.strud.xmlparser;
 
-import com.yammer.metrics.Metrics;
-import com.yammer.metrics.core.Meter;
-import com.yammer.metrics.core.MetricName;
-import de.strud.data.Document;
-import org.apache.log4j.Logger;
+import java.io.InputStream;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
-import java.io.InputStream;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import com.yammer.metrics.Metrics;
+import com.yammer.metrics.core.Meter;
+import com.yammer.metrics.core.MetricName;
+
+import de.strud.data.Document;
 
 /**
  * Simple stax parser, that parses wikipedia abstract dumps and transforms them into Document objects
@@ -23,7 +27,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class XMLParser {
 
-    private static final Logger LOG = Logger.getLogger(XMLParser.class);
+    private static final Logger LOG = LogManager.getLogger(XMLParser.class);
 
     private final InputStream source;
 

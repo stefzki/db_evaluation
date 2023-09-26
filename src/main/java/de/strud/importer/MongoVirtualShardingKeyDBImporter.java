@@ -1,16 +1,19 @@
 package de.strud.importer;
 
+import java.net.UnknownHostException;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.Mongo;
 import com.mongodb.WriteResult;
-import de.strud.data.Document;
-import org.apache.log4j.Logger;
 
-import java.net.UnknownHostException;
-import java.util.HashMap;
-import java.util.Map;
+import de.strud.data.Document;
 
 /**
  * A mongodb specific implementation, that maps Document objects to a mongodb compatible format and stores these objects
@@ -20,7 +23,7 @@ import java.util.Map;
  */
 public class MongoVirtualShardingKeyDBImporter implements DBImporter {
 
-    private static final Logger LOG = Logger.getLogger(MongoVirtualShardingKeyDBImporter.class);
+    private static final Logger LOG = LogManager.getLogger(MongoVirtualShardingKeyDBImporter.class);
 
     private final Mongo mongo;
 

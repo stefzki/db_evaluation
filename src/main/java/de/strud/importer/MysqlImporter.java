@@ -1,13 +1,15 @@
 package de.strud.importer;
 
-import de.strud.data.Document;
-import de.strud.exceptions.DBImporterInitializationException;
-import org.apache.log4j.Logger;
-
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import de.strud.data.Document;
+import de.strud.exceptions.DBImporterInitializationException;
 
 /**
  * A MySQL specific implementation, that inserts the articles into a innodb table. The database 'wikipedia' needs to be
@@ -17,7 +19,7 @@ import java.sql.SQLException;
  */
 public class MysqlImporter implements DBImporter {
 
-    private static final Logger LOG = Logger.getLogger(MysqlImporter.class);
+    private static final Logger LOG = LogManager.getLogger(MysqlImporter.class);
 
     private final Connection connection;
 

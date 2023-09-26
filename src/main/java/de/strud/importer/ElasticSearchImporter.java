@@ -1,39 +1,48 @@
 package de.strud.importer;
 
-import de.strud.data.Document;
-import org.apache.log4j.Logger;
-import org.elasticsearch.client.Client;
-import org.elasticsearch.common.xcontent.XContentFactory;
-import org.elasticsearch.node.Node;
-import org.elasticsearch.node.NodeBuilder;
-
 import java.io.IOException;
+
+import org.apache.http.HttpHost;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.elasticsearch.client.RestClient;
+
+import co.elastic.clients.elasticsearch.ElasticsearchClient;
+import co.elastic.clients.elasticsearch.core.IndexRequest;
+import co.elastic.clients.elasticsearch.core.IndexResponse;
+import co.elastic.clients.json.jackson.JacksonJsonpMapper;
+import co.elastic.clients.transport.ElasticsearchTransport;
+import co.elastic.clients.transport.rest_client.RestClientTransport;
+import de.strud.data.Document;
 
 /**
  * User: strud
  */
 public class ElasticSearchImporter implements DBImporter {
 
-    private static final Logger LOG = Logger.getLogger(ElasticSearchImporter.class);
+    private static final Logger LOG = LogManager.getLogger(ElasticSearchImporter.class);
+    private final ElasticsearchTransport transport;
 
-    private final Node node;
+    public ElasticSearchImporter(String host, int port) {
+        RestClient httpClient = RestClient.builder(
+                new HttpHost(host, port)
+            ).build();
 
-    public ElasticSearchImporter() {
-        this.node = NodeBuilder.nodeBuilder().clusterName("elasticsearch_sm").client(true).node();
+        transport = new RestClientTransport(httpClient, new JacksonJsonpMapper());
     }
 
 
     @Override
     public boolean importDocument(Document document) {
         try {
-        Client client = this.node.client();
+            ElasticsearchClient esClient = new ElasticsearchClient(transport);
+            IndexRequest<Document> request = IndexRequest.of(i -> i
+                .index("wikipedia")
+                .id(document.getUrl())
+                .document(document)
+            );
 
-        client.prepareIndex("wikipedia", "article").setSource(
-                XContentFactory.jsonBuilder().startObject()
-                        .field("url", document.getUrl())
-                        .field("title", document.getTitle())
-                        .field("text", document.getText())
-                        .endObject()).execute().actionGet();
+            IndexResponse response = esClient.index(request);
         } catch (IOException e) {
             LOG.error("Cannot index document.", e);
             return false;

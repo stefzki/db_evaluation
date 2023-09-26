@@ -1,14 +1,17 @@
 package de.strud.importer;
 
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.yammer.metrics.Metrics;
 import com.yammer.metrics.core.Meter;
 import com.yammer.metrics.core.MetricName;
 import com.yammer.metrics.core.Timer;
-import de.strud.data.Document;
-import org.apache.log4j.Logger;
 
-import java.util.List;
-import java.util.concurrent.TimeUnit;
+import de.strud.data.Document;
 
 /**
  * This class contains the basic importer logic. It passes all document objects to a specific DBImporter implementation.
@@ -17,7 +20,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class Importer {
 
-    private static final Logger LOG = Logger.getLogger(Importer.class);
+    private static final Logger LOG = LogManager.getLogger(Importer.class);
 
     private final DBImporter importer;
 

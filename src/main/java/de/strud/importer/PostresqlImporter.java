@@ -1,13 +1,15 @@
 package de.strud.importer;
 
-import de.strud.data.Document;
-import de.strud.exceptions.DBImporterInitializationException;
-import org.apache.log4j.Logger;
-
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import de.strud.data.Document;
+import de.strud.exceptions.DBImporterInitializationException;
 
 /**
  * A Postresql specific implementation, that inserts the articles. The database 'evaluation' needs to be
@@ -17,7 +19,7 @@ import java.sql.SQLException;
  */
 public class PostresqlImporter implements DBImporter {
 
-    private static final Logger LOG = Logger.getLogger(PostresqlImporter.class);
+    private static final Logger LOG = LogManager.getLogger(PostresqlImporter.class);
 
     private final Connection connection;
 

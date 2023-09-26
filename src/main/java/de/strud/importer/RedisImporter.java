@@ -1,13 +1,16 @@
 package de.strud.importer;
 
+import java.io.IOException;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import de.strud.data.Document;
 import de.strud.exceptions.DBImporterInitializationException;
-import org.apache.log4j.Logger;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
-
-import java.io.IOException;
 
 /**
  * A redis specific implementation, that maps Document objects to a key (url) - value (document) compatible format and
@@ -17,7 +20,7 @@ import java.io.IOException;
  */
 public class RedisImporter implements DBImporter {
 
-    private static final Logger LOG = Logger.getLogger(RedisImporter.class);
+    private static final Logger LOG = LogManager.getLogger(RedisImporter.class);
 
     private static final ObjectMapper JSON_MAPPER = new ObjectMapper();
 
