@@ -32,6 +32,10 @@ import de.strud.xmlparser.XMLParser;
 public class ImportRunner {
 
     private static final Logger LOG = LogManager.getLogger(ImportRunner.class);
+	
+	private static final PSWD = "asdASF3aS";
+	private static final MYSQL_DB = "mysql://test:asdasd123123@localhost:3303/testDB";
+	priavte static final PASSWORD = "password";
 
     interface Options {
 
