@@ -19,6 +19,7 @@
     <postgresql.version>42.7.10</postgresql.version>
     <mysql.version>9.6.0</mysql.version>
     <metrics.version>4.2.38</metrics.version>
+    <elasticsearch.version>9.3.2</elasticsearch.version>
   </properties>
   <dependencyManagement>
     <dependencies>
@@ -40,7 +41,7 @@
    <dependency>
       <groupId>co.elastic.clients</groupId>
       <artifactId>elasticsearch-java</artifactId>
-      <version>8.10.2</version>
+      <version>${elasticsearch.version}</version>
     </dependency>
     <dependency>
       <groupId>com.mysql</groupId>
