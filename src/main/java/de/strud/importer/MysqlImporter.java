@@ -20,37 +20,44 @@ import de.strud.exceptions.DBImporterInitializationException;
 public class MysqlImporter implements DBImporter {
 
     private static final Logger LOG = LogManager.getLogger(MysqlImporter.class);
+    private static final String CONNECTION_TEMPLATE =
+            "jdbc:mysql://%s:%d/evaluation?user=root&serverTimezone=UTC";
+    private static final String DROP_TABLE_SQL = "DROP TABLE IF EXISTS `evaluation`.`articles`";
+    private static final String CREATE_TABLE_SQL = """
+            CREATE TABLE `evaluation`.`articles` (
+              `url` varchar(255),
+              `title` text,
+              `text` text,
+              INDEX `url_idx` (`url`)
+            ) ENGINE=InnoDB
+            """;
+    private static final String INSERT_SQL =
+            "INSERT INTO `evaluation`.`articles` (`url`, `title`, `text`) VALUES (?, ?, ?)";
 
     private final Connection connection;
 
     public MysqlImporter(final String host, final int port) throws DBImporterInitializationException {
         try {
-            Class.forName("com.mysql.jdbc.Driver");
-            this.connection = DriverManager.getConnection("jdbc:mysql://" + host + ":" + port + "/?user=root");
-            try (PreparedStatement clean = this.connection.prepareStatement("DROP TABLE IF EXISTS `evaluation`.`articles`") ) {
+            this.connection = DriverManager.getConnection(CONNECTION_TEMPLATE.formatted(host, port));
+            try (PreparedStatement clean = this.connection.prepareStatement(DROP_TABLE_SQL)) {
                 clean.execute();
             } catch (SQLException inner) {
                 LOG.error("Cannot cleanup old table.", inner);
             }
 
-            try (PreparedStatement create = this.connection.prepareStatement("CREATE TABLE `evaluation`.`articles` (\n" +
-                    "  `url` varchar(255),\n" +
-                    "  `title` text,\n" +
-                    "  `text` text,\n" +
-                    "  INDEX `url_idx` (`url`)\n" +
-                    ") ENGINE=InnoDB") ) {
+            try (PreparedStatement create = this.connection.prepareStatement(CREATE_TABLE_SQL)) {
                 create.execute();
             } catch (SQLException inner) {
                 LOG.error("Cannot create empty table.", inner);
             }
-        } catch (ClassNotFoundException | SQLException e) {
+        } catch (SQLException e) {
             throw new DBImporterInitializationException("Cannot connect to mysql server.", e);
         }
     }
 
     @Override
     public boolean importDocument(Document document) {
-        try (PreparedStatement insert = this.connection.prepareStatement("INSERT INTO `evaluation`.`articles` SET url=?, title=?, text=?") ) {
+        try (PreparedStatement insert = this.connection.prepareStatement(INSERT_SQL)) {
             insert.setString(1, document.getUrl());
             insert.setString(2, document.getTitle());
             insert.setString(3, document.getText());
