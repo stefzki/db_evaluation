@@ -1,10 +1,13 @@
 package de.strud.xmlparser;
 
 import de.strud.data.Document;
-import junit.framework.Assert;
-import org.junit.Test;
-
 import java.util.List;
+
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * User: strud
@@ -15,17 +18,17 @@ public class XMLParserTest {
     public void testParsing() throws Exception {
         XMLParser parser = new XMLParser(
                 this.getClass().getClassLoader().getResourceAsStream("enwiki_short.xml"), 1);
-        Assert.assertTrue("Parser should have entries.", !parser.isRead());
+        assertTrue(!parser.isRead(), "Parser should have entries.");
         List<Document> docs = parser.parse(1);
-        Assert.assertNotNull("Documents cannot be null.", docs);
-        Assert.assertTrue("Documents should have length > 0.", docs.size() > 0);
-        Assert.assertNotNull("Text cannot be null.", docs.get(0).getText());
-        Assert.assertNotNull("Title cannot be null.", docs.get(0).getTitle());
-        Assert.assertNotNull("URL cannot be null.", docs.get(0).getUrl());
+        assertNotNull(docs, "Documents cannot be null.");
+        assertTrue(docs.size() > 0, "Documents should have length > 0.");
+        assertNotNull(docs.get(0).getText(), "Text cannot be null.");
+        assertNotNull(docs.get(0).getTitle(), "Title cannot be null.");
+        assertNotNull(docs.get(0).getUrl(), "URL cannot be null.");
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testParsingWithNull() throws Exception {
-        new XMLParser(null, 0);
+        assertThrows(IllegalArgumentException.class, () -> new XMLParser(null, 0));
     }
 }

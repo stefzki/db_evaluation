@@ -3,11 +3,11 @@ package de.strud;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.List;
 
 import javax.xml.stream.XMLStreamException;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -32,10 +32,6 @@ import de.strud.xmlparser.XMLParser;
 public class ImportRunner {
 
     private static final Logger LOG = LogManager.getLogger(ImportRunner.class);
-	
-	private static final PSWD = "asdASF3aS";
-	private static final MYSQL_DB = "mysql://test:asdasd123123@localhost:3303/testDB";
-	priavte static final PASSWORD = "password";
 
     interface Options {
 
@@ -51,11 +47,10 @@ public class ImportRunner {
 
     public static void main(String[] args) {
         Options opts = CliFactory.parseArguments(Options.class, args);
-        LOG.info("Starting import process, using file " + opts.getFile() + ".");
-        try {
-            FileInputStream fin = new FileInputStream(new File(opts.getFile()));
+        LOG.info("Starting import process, using file {}.", opts.getFile());
+        try (FileInputStream fin = new FileInputStream(new File(opts.getFile()))) {
             XMLParser parser = new XMLParser(fin, 1);
-            Importer importer = null;
+            Importer importer;
             switch (opts.getMode().toLowerCase()) {
                 case "mongo":
                     importer = new Importer(new MongoDBImporter(opts.getHost(), opts.getPort()));
@@ -73,22 +68,25 @@ public class ImportRunner {
                     importer = new Importer(new ElasticSearchImporter(opts.getHost(), opts.getPort()));
                     break;
                 default:
-                    LOG.error("Cannot create concrete importer, aborting.");
+                    LOG.error("Cannot create concrete importer for mode '{}', aborting.", opts.getMode());
                     System.exit(-1);
+                    return;
             }
             LOG.info("Start parsing documents.");
             while (!parser.isRead()) {
                 List<Document> documents = parser.parse(100000);
-                LOG.info("Parsed batch of " + documents.size() + " documents, starting import.");
+                LOG.info("Parsed batch of {} documents, starting import.", documents.size());
                 importer.importDocuments(documents);
-                LOG.info("Imported batch of " + documents.size() + " documents.");
+                LOG.info("Imported batch of {} documents.", documents.size());
             }
-            IOUtils.closeQuietly(fin);
         } catch (DBImporterInitializationException e) {
             LOG.error("Cannot connect to db.", e);
             System.exit(-1);
         } catch (FileNotFoundException e) {
             LOG.error("Cannot find selected xml file.", e);
+            System.exit(-1);
+        } catch (IOException e) {
+            LOG.error("Cannot close selected xml file.", e);
             System.exit(-1);
         } catch (XMLStreamException e) {
             LOG.error("Error when parsing xml.", e);

@@ -6,7 +6,7 @@ Just a small helper, that allows inserting a wikipedia xml abstract dump into da
 
 ## Prerequisites
 
-Download a xml abstract dump from https://dumps.wikimedia.org/enwiki/latest/enwiki-latest-abstract.xml.gz and an installed JDK 20 with Maven 2/3.
+Download an xml abstract dump from https://dumps.wikimedia.org/enwiki/latest/enwiki-latest-abstract.xml.gz and install JDK 21 with Maven 3.9+.
 
 ## Usage
 
@@ -18,7 +18,7 @@ Within your ide create a run configuration with the following program parameters
 --mode <target importer>
 ```
 
-If you are not using an ide and want to start the example from your command line, run mvn clean install from the command line. If the build is successful you can start the import by the following command from the target directory:
+If you are not using an IDE and want to start the example from your command line, run `mvn clean verify`. If the build is successful you can start the import by the following command from the `target` directory:
 
 ```
 java -cp "db-evaluation-0.1.0-SNAPSHOT.jar:$(echo deps/*.jar | tr ' ' ':')" de.strud.ImportRunner --file /tmp/enwiki-latest-abstract.xml --mode=<target importer> --host=<db host> --port=<port>
