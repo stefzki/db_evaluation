@@ -1,19 +1,15 @@
 package de.strud.importer;
 
-import java.net.UnknownHostException;
-import java.util.HashMap;
-import java.util.Map;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.bson.Document;
 
-import com.mongodb.BasicDBObject;
-import com.mongodb.DB;
-import com.mongodb.DBCollection;
-import com.mongodb.Mongo;
-import com.mongodb.WriteResult;
+import com.mongodb.MongoException;
+import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoClients;
+import com.mongodb.client.MongoCollection;
 
-import de.strud.data.Document;
+import de.strud.exceptions.DBImporterInitializationException;
 
 /**
  * A mongodb specific implementation, that maps Document objects to a mongodb compatible format and stores these objects
@@ -25,36 +21,43 @@ public class MongoVirtualShardingKeyDBImporter implements DBImporter {
 
     private static final Logger LOG = LogManager.getLogger(MongoVirtualShardingKeyDBImporter.class);
 
-    private final Mongo mongo;
+    private final MongoClient mongo;
 
-    private final DBCollection collection;
+    private final MongoCollection<Document> collection;
 
     private final int mongoShards;
 
     private int imported = 0;
 
-    public MongoVirtualShardingKeyDBImporter(final String host, final int port, final int mongoShards) throws UnknownHostException {
-        this.mongoShards = mongoShards;
-        this.mongo = new Mongo(host, port);
-        DB database = this.mongo.getDB("wikipedia");
-        this.collection = database.getCollection("articles");
+    public MongoVirtualShardingKeyDBImporter(final String host, final int port, final int mongoShards)
+            throws DBImporterInitializationException {
+        try {
+            this.mongoShards = mongoShards;
+            this.mongo = MongoClients.create("mongodb://" + host + ":" + port);
+            this.collection = this.mongo.getDatabase("wikipedia").getCollection("articles");
+            this.collection.countDocuments();
+        } catch (MongoException e) {
+            throw new DBImporterInitializationException("Cannot connect to mongo.", e);
+        }
     }
 
     @Override
-    public boolean importDocument(final Document document) {
-        boolean success = true;
-        Map<String, String> mapped = new HashMap<>();
-        mapped.put("url", document.getUrl());
-        mapped.put("title", document.getTitle());
-        mapped.put("text", document.getText());
-        mapped.put("sKey", String.valueOf(this.imported % this.mongoShards));
-        WriteResult result = this.collection.save(new BasicDBObject(mapped));
-        if (result.getError() != null) {
-            LOG.error("Unable to store document " + document + " reason: " + result.getError() + ".");
-            success = false;
+    public boolean importDocument(final de.strud.data.Document document) {
+        try {
+            this.collection.insertOne(toMongoDocument(document, this.imported % this.mongoShards));
+            this.imported++;
+            return true;
+        } catch (MongoException e) {
+            LOG.error("Unable to store document {}.", document, e);
+            this.imported++;
+            return false;
         }
-        this.imported++;
-        return success;
     }
 
+    private static Document toMongoDocument(final de.strud.data.Document document, final int shardKey) {
+        return new Document("url", document.getUrl())
+                .append("title", document.getTitle())
+                .append("text", document.getText())
+                .append("sKey", Integer.toString(shardKey));
+    }
 }

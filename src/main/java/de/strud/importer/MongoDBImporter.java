@@ -1,19 +1,14 @@
 package de.strud.importer;
 
-import java.net.UnknownHostException;
-import java.util.HashMap;
-import java.util.Map;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.bson.Document;
 
-import com.mongodb.BasicDBObject;
-import com.mongodb.DB;
-import com.mongodb.DBCollection;
-import com.mongodb.MongoClient;
-import com.mongodb.WriteResult;
+import com.mongodb.MongoException;
+import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoClients;
+import com.mongodb.client.MongoCollection;
 
-import de.strud.data.Document;
 import de.strud.exceptions.DBImporterInitializationException;
 
 /**
@@ -28,31 +23,33 @@ public class MongoDBImporter implements DBImporter {
 
     private final MongoClient mongo;
 
-    private final DBCollection collection;
+    private final MongoCollection<Document> collection;
 
 
     public MongoDBImporter(final String host, final int port) throws DBImporterInitializationException {
         try {
-            this.mongo = new MongoClient(host, port);
-            DB database = this.mongo.getDB("wikipedia_live");
-            this.collection = database.getCollection("articles");
-        } catch (UnknownHostException e) {
+            this.mongo = MongoClients.create("mongodb://" + host + ":" + port);
+            this.collection = this.mongo.getDatabase("wikipedia_live").getCollection("articles");
+            this.collection.countDocuments();
+        } catch (MongoException e) {
             throw new DBImporterInitializationException("Cannot connect to mongo.", e);
         }
     }
 
     @Override
-    public boolean importDocument(final Document document) {
-        boolean success = true;
-        Map<String, String> mapped = new HashMap<>();
-        mapped.put("url", document.getUrl());
-        mapped.put("title", document.getTitle());
-        mapped.put("text", document.getText());
-        WriteResult result = this.collection.save(new BasicDBObject(mapped));
-        if (result.getError() != null) {
-            LOG.error("Unable to store document " + document + " reason: " + result.getError() + ".");
-          success = false;
+    public boolean importDocument(final de.strud.data.Document document) {
+        try {
+            this.collection.insertOne(toMongoDocument(document));
+            return true;
+        } catch (MongoException e) {
+            LOG.error("Unable to store document {}.", document, e);
+            return false;
         }
-        return success;
+    }
+
+    private static Document toMongoDocument(final de.strud.data.Document document) {
+        return new Document("url", document.getUrl())
+                .append("title", document.getTitle())
+                .append("text", document.getText());
     }
 }
