@@ -3,7 +3,6 @@ package de.strud.xmlparser;
 import java.io.InputStream;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamConstants;
@@ -13,9 +12,8 @@ import javax.xml.stream.XMLStreamReader;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.yammer.metrics.Metrics;
-import com.yammer.metrics.core.Meter;
-import com.yammer.metrics.core.MetricName;
+import com.codahale.metrics.Meter;
+import com.codahale.metrics.MetricRegistry;
 
 import de.strud.data.Document;
 
@@ -35,14 +33,16 @@ public class XMLParser {
 
     private final XMLStreamReader streamReader;
 
-    private Meter xmlMeter;
+    private static final MetricRegistry METRIC_REGISTRY = new MetricRegistry();
+
+    private final Meter xmlMeter;
 
     public XMLParser(InputStream source, int every) throws XMLStreamException {
         if (source == null) {
             throw new IllegalArgumentException("InputStream cannot be null.");
         }
         this.source = source;
-        this.xmlMeter = Metrics.newMeter(new MetricName("xml", "parsing", "rate"), "parsed", TimeUnit.SECONDS);
+        this.xmlMeter = METRIC_REGISTRY.meter(MetricRegistry.name("xml", "parsing", "rate"));
         XMLInputFactory factory = XMLInputFactory.newInstance();
         this.streamReader = factory.createXMLStreamReader(this.source);
         this.every = every;
@@ -83,8 +83,10 @@ public class XMLParser {
                         }
                         parsed++;
                         this.xmlMeter.mark();
-                        if (this.xmlMeter.count() % 50000 == 0) {
-                            LOG.info("Parsed " + this.xmlMeter.count() + " documents, current rate " + this.xmlMeter.oneMinuteRate() + " docs/sec.");
+                        if (this.xmlMeter.getCount() % 50000 == 0) {
+                            LOG.info("Parsed {} documents, current rate {} docs/sec.",
+                                    this.xmlMeter.getCount(),
+                                    this.xmlMeter.getOneMinuteRate());
                         }
                         currentDoc = null;
                     } else if ("title".equals(this.streamReader.getLocalName())) {

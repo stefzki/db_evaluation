@@ -18,6 +18,7 @@
     <jedis.version>7.4.0</jedis.version>
     <postgresql.version>42.7.10</postgresql.version>
     <mysql.version>9.6.0</mysql.version>
+    <metrics.version>4.2.38</metrics.version>
   </properties>
   <dependencyManagement>
     <dependencies>
@@ -84,14 +85,9 @@
       <version>${log4j2.version}</version>
     </dependency>
     <dependency>
-      <groupId>com.lexicalscope.jewelcli</groupId>
-      <artifactId>jewelcli</artifactId>
-      <version>0.8.6</version>
-    </dependency>
-    <dependency>
-      <groupId>com.yammer.metrics</groupId>
+      <groupId>io.dropwizard.metrics</groupId>
       <artifactId>metrics-core</artifactId>
-      <version>2.2.0</version>
+      <version>${metrics.version}</version>
     </dependency>
     <dependency>
       <groupId>org.junit.jupiter</groupId>

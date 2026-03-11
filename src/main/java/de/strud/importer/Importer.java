@@ -1,15 +1,13 @@
 package de.strud.importer;
 
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.yammer.metrics.Metrics;
-import com.yammer.metrics.core.Meter;
-import com.yammer.metrics.core.MetricName;
-import com.yammer.metrics.core.Timer;
+import com.codahale.metrics.Meter;
+import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.Timer;
 
 import de.strud.data.Document;
 
@@ -24,15 +22,16 @@ public class Importer {
 
     private final DBImporter importer;
 
-    private Meter importMeter;
+    private static final MetricRegistry METRIC_REGISTRY = new MetricRegistry();
 
-    private Timer importTimer;
+    private final Meter importMeter;
 
+    private final Timer importTimer;
 
     public Importer(final DBImporter importer) {
         this.importer = importer;
-        this.importMeter = Metrics.newMeter(new MetricName("importer", "insert", "rate"), "inserts", TimeUnit.SECONDS);
-        this.importTimer = Metrics.newTimer(new MetricName("importer", "insert", "timing"), TimeUnit.MILLISECONDS, TimeUnit.MILLISECONDS);
+        this.importMeter = METRIC_REGISTRY.meter(MetricRegistry.name("importer", "insert", "rate"));
+        this.importTimer = METRIC_REGISTRY.timer(MetricRegistry.name("importer", "insert", "timing"));
     }
 
     public boolean importDocuments(final List<Document> documents) {
@@ -40,14 +39,28 @@ public class Importer {
         int importedDocs = 0;
         for (Document doc : documents) {
             importedDocs++;
-            long start = System.currentTimeMillis();
-            imported &= this.importer.importDocument(doc);
-            this.importTimer.update(System.currentTimeMillis() - start, TimeUnit.MILLISECONDS);
+            final Timer.Context context = this.importTimer.time();
+            try {
+                imported &= this.importer.importDocument(doc);
+            } finally {
+                context.stop();
+            }
             this.importMeter.mark();
-            if (this.importMeter.count() % 10000 == 0) {
-                LOG.info("Inserted " + importedDocs + " from " + documents.size() + " documents (total " + this.importMeter.count() + "), " +
-                        "current rate " + this.importMeter.oneMinuteRate() + " docs/sec; " +
-                        "est. " + ((documents.size() - importedDocs) / this.importMeter.oneMinuteRate()) + " seconds to go, currently " + this.importTimer.mean() + " ms/doc (min: " + this.importTimer.min() + ", max: " + this.importTimer.max() + ").");
+            if (this.importMeter.getCount() % 10000 == 0) {
+                double oneMinuteRate = this.importMeter.getOneMinuteRate();
+                double secondsRemaining = oneMinuteRate > 0
+                        ? (documents.size() - importedDocs) / oneMinuteRate
+                        : Double.POSITIVE_INFINITY;
+                LOG.info(
+                        "Inserted {} from {} documents (total {}), current average rate {} docs/sec; est. {} seconds to go, currently {} ms/doc (min: {}, max: {}).",
+                        importedDocs,
+                        documents.size(),
+                        this.importMeter.getCount(),
+                        oneMinuteRate,
+                        secondsRemaining,
+                        this.importTimer.getSnapshot().getMean() / 1_000_000.0,
+                        this.importTimer.getSnapshot().getMin() / 1_000_000.0,
+                        this.importTimer.getSnapshot().getMax() / 1_000_000.0);
             }
         }
         return imported;
